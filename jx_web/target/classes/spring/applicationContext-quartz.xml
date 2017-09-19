@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans    
+	http://www.springframework.org/schema/beans/spring-beans.xsd    
+	http://www.springframework.org/schema/aop    
+	http://www.springframework.org/schema/aop/spring-aop.xsd    
+	http://www.springframework.org/schema/tx    
+	http://www.springframework.org/schema/tx/spring-tx.xsd    
+	http://www.springframework.org/schema/context    
+	http://www.springframework.org/schema/context/spring-context.xsd">
+	
+<!-- 1 定义一个任务类 :job-->
+	<bean id="jobBean" class="cn.ajajaaj.jx.quartz.ShipTimeJob">
+	<property name="contractService" ref="contractService"></property>
+	</bean>
+	<!-- 2 任务类描述 -->
+	<bean id="jobDetails" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+		<!-- 定义目标对象 -->
+		<property name="targetObject" ref="jobBean"></property>
+		<!-- 定义目标方法 -->
+		<property name="targetMethod" value="sendMail"></property>
+	</bean>
+	<!-- 3 触发器  -->
+	<bean id="jobTrigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+		<!-- 执行那个任务 -->
+		<property name="jobDetail" ref="jobDetails"></property>
+		<!-- 定义合适执行execute方法。表达式，每10秒执行一次 -->
+		<property name="cronExpression" value="0/10 * * * * ?"></property>
+	</bean>
+	<!-- 4 总管理容器:入口 -->
+	<bean id="startQuartz" class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
+		<property name="triggers">
+			<list>
+				<ref bean="jobTrigger"/>
+				<!-- 配置多个触发器 -->
+			</list>
+		</property>
+	</bean>
+
+</beans>
